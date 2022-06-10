@@ -1,0 +1,29 @@
+{
+  "name": "forkify-app_-building-a-modern-application",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Syed18103392/Forkify-App_-Building-a-Modern-Application.git"
+  },
+  "keywords": [
+    "JS"
+  ],
+  "author": "Sajib18103392",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Syed18103392/Forkify-App_-Building-a-Modern-Application/issues"
+  },
+  "homepage": "https://github.com/Syed18103392/Forkify-App_-Building-a-Modern-Application#readme",
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.6.0",
+    "parcel": "^2.6.0"
+  },
+  "dependencies": {
+    "sass": "^1.52.2"
+  }
+}
