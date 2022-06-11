@@ -1,4 +1,6 @@
 import icons from 'url:../img/icons.svg';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 console.log(icons);
 const recipeContainer = document.querySelector('.recipe');
 
@@ -13,12 +15,24 @@ const timeout = function (s) {
 // https://forkify-api.herokuapp.com/v2
 
 ///////////////////////////////////////
+const renderSpinner = function (parentElement) {
+  const markup = `<div class="spinner">
+                        <svg>
+                          <use href="${icons
+    }#icon-loader"></use>
+                        </svg>
+                      </div>`;
+  parentElement.innerHTML = ' ';
+  parentElement.insertAdjacentHTML('afterbegin',markup);
+}
 const showRecipe = async function(){
   // 1) rendeding pizza info 
+  renderSpinner(recipeContainer);
   try{
     const res = await fetch('https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886');
     const data = await res.json();
     // console.log(res,data);
+    
     if(!res.ok){
       throw new Error(`${data.message} status code ${res.status}`);
     }
@@ -38,9 +52,10 @@ const showRecipe = async function(){
     console.log(recipe);
 
     // 2) Rendering recipe 
-
+   
     const markup = `<figure class="recipe__fig">
           <img src="${recipe.image}" alt="${recipe.title}" class="recipe__img" />
+
           <h1 class="recipe__title">
             <span>${recipe.title}</span>
           </h1>
