@@ -523,10 +523,13 @@ const controlRecipes = async function() {
         // 2) Rendering recipe 
         (0, _recipeViewJsDefault.default).render(recipe);
     } catch (e) {
-        alert(e);
+        (0, _recipeViewJsDefault.default).renderError(`${e} 💥💥💥`);
     }
 };
-controlRecipes();
+const init = function() {
+    (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
+};
+init();
 
 },{"core-js/modules/es.array.includes.js":"dkJzX","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../js/model.js":"Y4A21","./views/recipeView.js":"l60JC"}],"dkJzX":[function(require,module,exports) {
 "use strict";
@@ -2380,8 +2383,9 @@ const loadRecipe = async function(id) {
             cookingTime: recipe.cooking_time,
             ingredients: recipe.ingredients
         };
+        console.log(state.recipe);
     } catch (err) {
-        console.error(`${err} 💥💥💥`);
+        throw err;
     }
 };
 
@@ -2435,15 +2439,35 @@ class RecipeView {
         this.#clear();
         this.#parentElement.insertAdjacentHTML("afterbegin", markup);
     }
-    renderSpinner = function() {
+    renderSpinner() {
         const markup = `<div class="spinner">
-                        <svg>
-                          <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
-                        </svg>
-                      </div>`;
-        this.#parentElement.innerHTML = " ";
+        <svg>
+        <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
+        </svg>
+        </div>`;
+        this.#clear();
         this.#parentElement.insertAdjacentHTML("afterbegin", markup);
-    };
+    }
+    addHandlerRender(handler) {
+        [
+            "hashchange",
+            "load"
+        ].forEach((ev)=>{
+            window.addEventListener(ev, handler);
+        });
+    }
+    renderError(em) {
+        const markup = `<div class="error">
+            <div>
+              <svg>
+                <use href="${(0, _iconsSvgDefault.default)}/icons.svg#icon-alert-triangle"></use>
+              </svg>
+            </div>
+            <p>${em}</p>
+          </div> `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
      #clear() {
         this.#parentElement.innerHTML = "";
     }

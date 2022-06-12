@@ -12,7 +12,7 @@ const controlRecipes = async function(){
     const id = window.location.hash.slice(1);
     if(!id) return;
 
-  recipeView.renderSpinner();
+     recipeView.renderSpinner();
   
   // 1) rendeding pizza info 
     await model.loadRecipe(id);
@@ -21,10 +21,15 @@ const controlRecipes = async function(){
     console.log(recipe);
     // 2) Rendering recipe 
     recipeView.render(recipe);
-    
-        }catch(e){
-          alert(e);
-        }
+    }
+    catch(e){
+      recipeView.renderError(`${e} 💥💥💥`);
+    }
 
-} 
-controlRecipes();
+}
+
+const init = function(){
+  recipeView.addHandlerRender(controlRecipes);
+}
+
+init();
