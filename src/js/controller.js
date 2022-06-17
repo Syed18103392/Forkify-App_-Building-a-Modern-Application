@@ -59,15 +59,29 @@ const controlPagination= function(goto){
   console.log(goto);
   // Render result
   resultView.render(model.getSearchResultPerPage(goto));
-  console.log(model.getSearchResultPerPage(goto) );
+  console.log(model.getSearchResultPerPage(goto)  );
 
   //render the pagination 
   paginationView.render(model.state.search);
 }
 
+
+const controlServing = function(updateTo){
+  // 1) Update Service 
+
+  model.updateService(updateTo);
+  // console.log(model.state.recipe);
+  // 2) Update View 
+  const { recipe } = model.state;
+
+  // 2) Rendering recipe 
+  recipeView.render(recipe);
+}
 const init = function(){
   recipeView.addHandlerRender(controlRecipes);
+  recipeView.addHandlerUpdateServing(controlServing)
   searchView.addHandlerSearch(controlSearchResult);
   paginationView.addHandlerPagination(controlPagination);
+
 }
 init();
