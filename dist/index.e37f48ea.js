@@ -525,7 +525,6 @@ const controlRecipes = async function() {
         // 1) rendeding pizza info 
         await _modelJs.loadRecipe(id);
         const { recipe  } = _modelJs.state;
-        // console.log(recipe);
         // 2) Rendering recipe 
         (0, _recipeViewJsDefault.default).render(recipe);
     } catch (e) {
@@ -548,9 +547,18 @@ const controlSearchResult = async function() {
         (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
     } catch (e) {}
 };
+const controlPagination = function(goto) {
+    console.log(goto);
+    // Render result
+    (0, _resultViewJsDefault.default).render(_modelJs.getSearchResultPerPage(goto));
+    console.log(_modelJs.getSearchResultPerPage(goto));
+    //render the pagination 
+    (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
+};
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
     (0, _searchViewJsDefault.default).addHandlerSearch(controlSearchResult);
+    (0, _paginationViewJsDefault.default).addHandlerPagination(controlPagination);
 };
 init();
 
@@ -2996,26 +3004,57 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _view = require("./view");
 var _viewDefault = parcelHelpers.interopDefault(_view);
+var _iconsSvg = require("url:../../img/icons.svg");
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class PaginationView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector(".pagination");
     _generateMarkup() {
         console.log("calling");
         const currentPage = this._data.currentPage;
-        // console.log(this._data.result.length);
         const numPages = Math.ceil(this._data.result.length / this._data.post_per_page);
-        console.log(numPages);
         // 1) pagination for first page 
-        if (currentPage === 1 && currentPage < numPages) return "first page";
+        if (currentPage === 1 && currentPage < numPages) return `
+          <button data-goto=${currentPage + 1} class="btn--inline pagination__btn--next">
+            <span>Page ${currentPage + 1}</span>
+            <svg class="search__icon">
+              <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
+            </svg>
+          </button>`;
         // 2) pagination for middle page
-        if (currentPage > 1 && currentPage < numPages) return "middle page";
+        if (currentPage > 1 && currentPage < numPages) return `<button data-goto=${currentPage - 1} class="btn--inline pagination__btn--prev">
+            <svg class="search__icon">
+              <use href="${0, _iconsSvgDefault.default}#icon-arrow-left"></use>
+            </svg>
+            <span>Page ${currentPage - 1}</span>
+          </button>
+          <button data-goto=${currentPage + 1} class="btn--inline pagination__btn--next">
+            <span>Page ${currentPage + 1}</span>
+            <svg class="search__icon">
+              <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
+            </svg>
+          </button>`;
         // 3) pagination for last page 
-        if (currentPage === numPages) return "last page";
+        if (currentPage === numPages) return `<button data-goto=${currentPage - 1} class="btn--inline pagination__btn--prev">
+            <svg class="search__icon">
+              <use href="${0, _iconsSvgDefault.default}#icon-arrow-left"></use>
+            </svg>
+            <span>Page ${currentPage - 1}</span>
+          </button>`;
         //4) pagination when only one page
-        return "only one page";
+        return "";
+    }
+    addHandlerPagination(handle) {
+        this._parentElement.addEventListener("click", function(e) {
+            e.preventDefault();
+            const btn = e.target.closest("button");
+            if (!btn) return;
+            const goTo = +btn.dataset.goto;
+            handle(goTo);
+        });
     }
 }
 exports.default = new PaginationView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./view":"bWlJ9"}]},["2kSJi","aenu9"], "aenu9", "parcelRequiree847")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./view":"bWlJ9","url:../../img/icons.svg":"loVOp"}]},["2kSJi","aenu9"], "aenu9", "parcelRequiree847")
 
 //# sourceMappingURL=index.e37f48ea.js.map

@@ -16,14 +16,13 @@ const controlRecipes = async function(){
     const id = window.location.hash.slice(1);
     if(!id) return;
 
-     recipeView.renderSpinner();
+    recipeView.renderSpinner();
   
   // 1) rendeding pizza info 
     await model.loadRecipe(id);
-
     const {recipe}  = model.state; 
-    // console.log(recipe);
-    // 2) Rendering recipe 
+
+  // 2) Rendering recipe 
     recipeView.render(recipe);
     }
     catch(e){
@@ -56,9 +55,19 @@ const controlSearchResult = async function(){
   }
 }
 
+const controlPagination= function(goto){
+  console.log(goto);
+  // Render result
+  resultView.render(model.getSearchResultPerPage(goto));
+  console.log(model.getSearchResultPerPage(goto) );
+
+  //render the pagination 
+  paginationView.render(model.state.search);
+}
+
 const init = function(){
   recipeView.addHandlerRender(controlRecipes);
   searchView.addHandlerSearch(controlSearchResult);
-
+  paginationView.addHandlerPagination(controlPagination);
 }
 init();
