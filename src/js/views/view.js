@@ -10,6 +10,31 @@ export default class View{
         this._clear();
         this._parentElement.insertAdjacentHTML("afterbegin", markup);
     }
+    update(data) {
+        if (!data || (Array.isArray(data) && data.length === 0)) return this.renderError();
+        this._data = data;
+        const newMarkup = this._generateMarkup();
+        const virtualDom = document.createRange().createContextualFragment(newMarkup);
+        const newElement = Array.from(virtualDom.querySelectorAll('*'));
+        const oldElement = Array.from(this._parentElement.querySelectorAll('*'));
+        // console.log(newElement,oldElement);
+
+        newElement.forEach((newEl,i)=>{
+            const oldEl = oldElement[i];
+            if(!newEl.isEqualNode(oldEl) && oldEl.firstChild.nodeValue.trim() !== ''){
+                oldEl.textContent = newEl.textContent;
+            };  
+
+            if(!newEl.isEqualNode(oldEl)){
+                Array.from(newEl.attributes).forEach(attr=>{
+                    oldEl.setAttribute(attr.name,attr.value);
+                });
+            }
+        })
+        
+        // this._clear();
+        // this._parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
 
     renderSpinner() {
         const markup = `<div class="spinner">

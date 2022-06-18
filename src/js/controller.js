@@ -75,7 +75,7 @@ const controlServing = function(updateTo){
   const { recipe } = model.state;
 
   // 2) Rendering recipe 
-  recipeView.render(recipe);
+  recipeView.update(recipe);
 }
 const init = function(){
   recipeView.addHandlerRender(controlRecipes);

@@ -111,7 +111,8 @@ class RecipeView extends View{
                     if(!btn) return ;
 
                     const updateTo = +btn.dataset.updateTo;
-                    handle(updateTo);
+                    if(updateTo>0)
+                        handle(updateTo);
 
                 })
             }

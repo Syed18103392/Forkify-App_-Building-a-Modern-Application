@@ -562,7 +562,7 @@ const controlServing = function(updateTo) {
     // 2) Update View 
     const { recipe  } = _modelJs.state;
     // 2) Rendering recipe 
-    (0, _recipeViewJsDefault.default).render(recipe);
+    (0, _recipeViewJsDefault.default).update(recipe);
 };
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
@@ -2620,7 +2620,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
             // console.log(btn);
             if (!btn) return;
             const updateTo = +btn.dataset.updateTo;
-            handle(updateTo);
+            if (updateTo > 0) handle(updateTo);
         });
     }
 }
@@ -2676,6 +2676,24 @@ class View {
         const markup = this._generateMarkup();
         this._clear();
         this._parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    update(data) {
+        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+        this._data = data;
+        const newMarkup = this._generateMarkup();
+        const virtualDom = document.createRange().createContextualFragment(newMarkup);
+        const newElement = Array.from(virtualDom.querySelectorAll("*"));
+        const oldElement = Array.from(this._parentElement.querySelectorAll("*"));
+        // console.log(newElement,oldElement);
+        newElement.forEach((newEl, i)=>{
+            const oldEl = oldElement[i];
+            if (!newEl.isEqualNode(oldEl) && oldEl.firstChild.nodeValue.trim() !== "") oldEl.textContent = newEl.textContent;
+            if (!newEl.isEqualNode(oldEl)) Array.from(newEl.attributes).forEach((attr)=>{
+                oldEl.setAttribute(attr.name, attr.value);
+            });
+        });
+    // this._clear();
+    // this._parentElement.insertAdjacentHTML("afterbegin", markup);
     }
     renderSpinner() {
         const markup = `<div class="spinner">
