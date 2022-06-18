@@ -17,7 +17,7 @@ const controlRecipes = async function(){
     if(!id) return;
 
     recipeView.renderSpinner();
-  
+    resultView.update(model.getSearchResultPerPage());
   // 1) rendeding pizza info 
     await model.loadRecipe(id);
     const {recipe}  = model.state; 
