@@ -5,13 +5,12 @@ class PaginationView extends View{
     _parentElement = document.querySelector('.pagination');
     
     _generateMarkup() {
-        console.log('calling');
         const currentPage = this._data.currentPage;
   
         const numPages = Math.ceil(this._data.result.length / this._data.post_per_page);
 
 
-    // 1) pagination for first page 
+    //  NOTE: 1) pagination for first page 
         if(currentPage===1 && currentPage< numPages){
             return `
           <button data-goto=${currentPage + 1} class="btn--inline pagination__btn--next">
@@ -22,7 +21,7 @@ class PaginationView extends View{
           </button>`;
         }
 
-    // 2) pagination for middle page
+    //  NOTE: 2) pagination for middle page
         if (currentPage > 1 && currentPage < numPages) {
             return `<button data-goto=${currentPage - 1} class="btn--inline pagination__btn--prev">
             <svg class="search__icon">
@@ -38,7 +37,7 @@ class PaginationView extends View{
           </button>`;
         }
 
-    // 3) pagination for last page 
+    //  NOTE: 3) pagination for last page 
         if ( currentPage === numPages) {
             return `<button data-goto=${currentPage - 1} class="btn--inline pagination__btn--prev">
             <svg class="search__icon">

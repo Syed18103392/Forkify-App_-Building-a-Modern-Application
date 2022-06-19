@@ -516,64 +516,81 @@ var _resultViewJsDefault = parcelHelpers.interopDefault(_resultViewJs);
 var _paginationViewJs = require("./views/paginationView.js");
 var _paginationViewJsDefault = parcelHelpers.interopDefault(_paginationViewJs);
 var _runtime = require("regenerator-runtime/runtime");
+var _viewJs = require("./views/view.js");
+var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
 if (module.hot) module.hot.accept();
+//NOTE Single Recipe view Controller 
 const controlRecipes = async function() {
     try {
         const id = window.location.hash.slice(1);
         if (!id) return;
         (0, _recipeViewJsDefault.default).renderSpinner();
         (0, _resultViewJsDefault.default).update(_modelJs.getSearchResultPerPage());
-        // 1) rendeding pizza info 
+        //  1) rendeding pizza info 
         await _modelJs.loadRecipe(id);
         const { recipe  } = _modelJs.state;
-        // 2) Rendering recipe 
+        //  2) Rendering recipe 
         (0, _recipeViewJsDefault.default).render(recipe);
     } catch (e) {
         (0, _recipeViewJsDefault.default).renderError();
     }
 };
+//NOTE Search Result Controller 
 const controlSearchResult = async function() {
     try {
-        // 0) Load Spinner 
+        //  0) Load Spinner 
         (0, _resultViewJsDefault.default).renderSpinner();
-        // 1) Get search query
+        //  1) Get search query
         const query = (0, _searchViewJsDefault.default).getQuery();
         if (!query) return;
-        // Load result
+        //  Load result
         await _modelJs.loadSearchResult(query);
-        // Render result
+        //  Render result
         (0, _resultViewJsDefault.default).render(_modelJs.getSearchResultPerPage());
         console.log(_modelJs.getSearchResultPerPage());
-        //render the pagination 
+        // render the pagination 
+        _modelJs.state.search.currentPage = 1;
         (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
     } catch (e) {}
 };
+//NOTE Pagination controller 
 const controlPagination = function(goto) {
     console.log(goto);
-    // Render result
+    //  Render result
     (0, _resultViewJsDefault.default).render(_modelJs.getSearchResultPerPage(goto));
     console.log(_modelJs.getSearchResultPerPage(goto));
-    //render the pagination 
+    //  render the pagination
     (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
 };
+// NOTE Serving controller 
 const controlServing = function(updateTo) {
-    // 1) Update Service 
+    //  1) Update Service 
     _modelJs.updateService(updateTo);
-    // console.log(model.state.recipe);
-    // 2) Update View 
+    //  console.log(model.state.recipe);
+    //  2) Update View 
     const { recipe  } = _modelJs.state;
-    // 2) Rendering recipe 
+    //  2) Rendering recipe 
     (0, _recipeViewJsDefault.default).update(recipe);
 };
+// NOTE: Bookmarked controller 
+const controlBookmarked = function() {
+    // Add to bookmarks
+    if (!_modelJs.state.recipe.bookmarked) _modelJs.addBookmarked(_modelJs.state.recipe);
+    else _modelJs.deleteBookmarked(_modelJs.state.recipe.id);
+    console.log(_modelJs.state.recipe);
+    (0, _recipeViewJsDefault.default).update(_modelJs.state.recipe);
+};
+//NOTE On page load function 
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
     (0, _recipeViewJsDefault.default).addHandlerUpdateServing(controlServing);
+    (0, _recipeViewJsDefault.default).addHandlerBookmarkedRecipe(controlBookmarked);
     (0, _searchViewJsDefault.default).addHandlerSearch(controlSearchResult);
     (0, _paginationViewJsDefault.default).addHandlerPagination(controlPagination);
 };
 init();
 
-},{"core-js/modules/es.array.includes.js":"dkJzX","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../js/model.js":"Y4A21","./views/recipeView.js":"l60JC","./views/searchView.js":"9OQAM","./views/resultView.js":"f70O5","./views/paginationView.js":"6z7bi"}],"dkJzX":[function(require,module,exports) {
+},{"core-js/modules/es.array.includes.js":"dkJzX","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../js/model.js":"Y4A21","./views/recipeView.js":"l60JC","./views/searchView.js":"9OQAM","./views/resultView.js":"f70O5","./views/paginationView.js":"6z7bi","./views/view.js":"bWlJ9"}],"dkJzX":[function(require,module,exports) {
 "use strict";
 var $ = require("../internals/export");
 var $includes = require("../internals/array-includes").includes;
@@ -2408,6 +2425,8 @@ parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResult", ()=>loadSearchResult);
 parcelHelpers.export(exports, "getSearchResultPerPage", ()=>getSearchResultPerPage);
 parcelHelpers.export(exports, "updateService", ()=>updateService);
+parcelHelpers.export(exports, "addBookmarked", ()=>addBookmarked);
+parcelHelpers.export(exports, "deleteBookmarked", ()=>deleteBookmarked);
 var _regeneratorRuntime = require("regenerator-runtime");
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
@@ -2418,7 +2437,8 @@ const state = {
         result: [],
         post_per_page: (0, _configJs.POST_PER_PAGE),
         currentPage: 1
-    }
+    },
+    bookmarkes: []
 };
 const loadRecipe = async function(id) {
     try {
@@ -2434,6 +2454,10 @@ const loadRecipe = async function(id) {
             cookingTime: recipe.cooking_time,
             ingredients: recipe.ingredients
         };
+        state.bookmarkes.some((bookmark)=>{
+            if (bookmark.id === id) state.recipe.bookmarked = true;
+            else state.recipe.bookmarked = false;
+        });
         console.log(state.recipe);
     } catch (err) {
         throw err;
@@ -2470,6 +2494,18 @@ const updateService = function(newServings) {
         ingredient.quantity = ingredient.quantity * newServings / oldServing;
     });
     state.recipe.servings = newServings;
+};
+const addBookmarked = (recipe)=>{
+    // 1) push recipe to the bookmarked array
+    state.bookmarkes.push(recipe);
+    // 2) marked recipe bookmarked  ;
+    if (recipe.id === state.recipe.id) return state.recipe.bookmarked = true;
+};
+const deleteBookmarked = (id)=>{
+    const index = state.bookmarkes.find((el)=>el.id === id);
+    state.bookmarkes.splice(index, 1);
+    // 2) marked recipe NOT bookmarked 
+    if (id === state.recipe.id) return state.recipe.bookmarked = false;
 };
 
 },{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./config.js":"k5Hzs","./helpers.js":"hGI1E"}],"k5Hzs":[function(require,module,exports) {
@@ -2562,13 +2598,13 @@ class RecipeView extends (0, _viewJsDefault.default) {
               <div class="recipe__user-generated">
 
               </div>
-              <button class="btn--round">
+              <button class="btn--round btn--bookmark__update ">
               <svg class="">
-              <use href="${0, _iconsSvgDefault.default}#icon-bookmark-fill"></use>
+              <use href="${0, _iconsSvgDefault.default}#icon-bookmark${this._data.bookmarked ? "-fill" : ""}"></use>
               </svg>
               </button>
               </div>
-              
+
               <div class="recipe__ingredients">
               <h2 class="heading--2">Recipe ingredients</h2>
               <ul class="recipe__ingredient-list">
@@ -2622,6 +2658,13 @@ class RecipeView extends (0, _viewJsDefault.default) {
             if (!btn) return;
             const updateTo = +btn.dataset.updateTo;
             if (updateTo > 0) handle(updateTo);
+        });
+    }
+    addHandlerBookmarkedRecipe(handle) {
+        this._parentElement.addEventListener(`click`, (e)=>{
+            const btn = e.target.closest(".btn--bookmark__update");
+            if (!btn) return;
+            handle();
         });
     }
 }
@@ -2687,8 +2730,9 @@ class View {
         // console.log(newElement,oldElement);
         newElement.forEach((newEl, i)=>{
             const oldEl = oldElement[i];
-            if (!newEl.isEqualNode(oldEl) && oldEl.firstChild.nodeValue.trim() !== "") oldEl.textContent = newEl.textContent;
+            if (!newEl.isEqualNode(oldEl) && oldEl.firstChild?.nodeValue.trim() !== "") oldEl.textContent = newEl.textContent;
             if (!newEl.isEqualNode(oldEl)) Array.from(newEl.attributes).forEach((attr)=>{
+                console.log(attr.name, attr.value);
                 oldEl.setAttribute(attr.name, attr.value);
             });
         });
@@ -3055,10 +3099,9 @@ var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class PaginationView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector(".pagination");
     _generateMarkup() {
-        console.log("calling");
         const currentPage = this._data.currentPage;
         const numPages = Math.ceil(this._data.result.length / this._data.post_per_page);
-        // 1) pagination for first page 
+        //  NOTE: 1) pagination for first page 
         if (currentPage === 1 && currentPage < numPages) return `
           <button data-goto=${currentPage + 1} class="btn--inline pagination__btn--next">
             <span>Page ${currentPage + 1}</span>
@@ -3066,7 +3109,7 @@ class PaginationView extends (0, _viewDefault.default) {
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
             </svg>
           </button>`;
-        // 2) pagination for middle page
+        //  NOTE: 2) pagination for middle page
         if (currentPage > 1 && currentPage < numPages) return `<button data-goto=${currentPage - 1} class="btn--inline pagination__btn--prev">
             <svg class="search__icon">
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-left"></use>
@@ -3079,7 +3122,7 @@ class PaginationView extends (0, _viewDefault.default) {
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
             </svg>
           </button>`;
-        // 3) pagination for last page 
+        //  NOTE: 3) pagination for last page 
         if (currentPage === numPages) return `<button data-goto=${currentPage - 1} class="btn--inline pagination__btn--prev">
             <svg class="search__icon">
               <use href="${0, _iconsSvgDefault.default}#icon-arrow-left"></use>

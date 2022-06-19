@@ -20,12 +20,13 @@ export default class View{
 
         newElement.forEach((newEl,i)=>{
             const oldEl = oldElement[i];
-            if(!newEl.isEqualNode(oldEl) && oldEl.firstChild.nodeValue.trim() !== ''){
+            if(!newEl.isEqualNode(oldEl) && oldEl.firstChild?.nodeValue.trim() !== ''){
                 oldEl.textContent = newEl.textContent;
             };  
 
             if(!newEl.isEqualNode(oldEl)){
                 Array.from(newEl.attributes).forEach(attr=>{
+                    console.log(attr.name, attr.value);
                     oldEl.setAttribute(attr.name,attr.value);
                 });
             }
