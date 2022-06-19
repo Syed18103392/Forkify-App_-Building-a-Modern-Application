@@ -29,16 +29,15 @@ export const loadRecipe = async function(id){
             cookingTime: recipe.cooking_time,
             ingredients: recipe.ingredients
         }
-        state.bookmarkes.some(bookmark=>{
-            if(bookmark.id === id)
+        // console.log(state.bookmarkes);
+        if(state.bookmarkes.some(bookmark=>bookmark.id === id))
                 state.recipe.bookmarked = true;
             else
                 state.recipe.bookmarked = false; 
-        })
-
-        console.log(state.recipe);
+        
     }
     catch(err){
+        //console.log(err);
         throw err;
     }
 }
@@ -58,8 +57,10 @@ export const loadSearchResult = async function (query){
                 ingredients: recipe.ingredients
             }
         })
+        //console.log(state.search);
     }
     catch(e){
+        //console.log(e);
         throw e;
     }
 }
@@ -79,14 +80,40 @@ export const updateService = function (newServings){
     })
     state.recipe.servings = newServings;
 }
+
+
+//NOTE Add data to the local storage 
+const persistBookmark = function () {
+    //console.log('loading......')
+    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarkes));
+}
+
+//NOTE Retrive Data From Localhost
+const retriveBookmark = ()=>{
+    // console.log('loading retriving...');
+    const storage = JSON.parse(localStorage.getItem('bookmarks'));
+    
+    if(storage){ 
+        state.bookmarkes = storage ;
+    }
+    // console.log(state.bookmarkes);
+} 
+
 // NOTE Add bookmarked:
-
 export const addBookmarked = (recipe)=>{
-    // 1) push recipe to the bookmarked array
+    // Push recipe to the bookmarked array
     state.bookmarkes.push(recipe);
+    
+    // Marked recipe bookmarked  ;
+    if(recipe.id === state.recipe.id)
+        {
+            state.recipe.bookmarked=true;
+        }
 
-    // 2) marked recipe bookmarked  ;
-    if(recipe.id === state.recipe.id) return state.recipe.bookmarked=true;
+    // Send data to the localstorage 
+    persistBookmark();
+
+
 }
 
 
@@ -94,7 +121,16 @@ export const addBookmarked = (recipe)=>{
 export const deleteBookmarked = id=>{
     const index = state.bookmarkes.find( el=>el.id===id );
     state.bookmarkes.splice(index,1);
-
-    // 2) marked recipe NOT bookmarked 
-    if (id === state.recipe.id) return state.recipe.bookmarked = false;
+        
+    // Marked recipe NOT bookmarked 
+    if (id === state.recipe.id)  state.recipe.bookmarked = false;
+    
+    // Send data to the localstorage 
+    persistBookmark();
 }
+
+//NOTE Initialized function for initialized the data with page load 
+const init = () => {
+    retriveBookmark();
+}
+init();
